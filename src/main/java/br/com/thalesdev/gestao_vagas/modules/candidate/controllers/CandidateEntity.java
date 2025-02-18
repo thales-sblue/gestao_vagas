@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.hibernate.validator.constraints.Length;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class CandidateEntity {
     private UUID id;
     private String name;
 
+    @NotBlank()
     @Pattern(regexp = "^[a-zA-Z0-9]*$", message = "O campo (username) deve conter apenas letras e numeros")
     private String username;
 
