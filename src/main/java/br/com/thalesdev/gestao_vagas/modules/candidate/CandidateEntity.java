@@ -1,4 +1,4 @@
-package br.com.thalesdev.gestao_vagas.modules.candidate.controllers;
+package br.com.thalesdev.gestao_vagas.modules.candidate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
