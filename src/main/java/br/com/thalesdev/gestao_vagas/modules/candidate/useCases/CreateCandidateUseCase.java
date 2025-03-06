@@ -1,6 +1,7 @@
 package br.com.thalesdev.gestao_vagas.modules.candidate.useCases;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.thalesdev.gestao_vagas.exceptions.UserFoundException;
@@ -12,11 +13,17 @@ public class CreateCandidateUseCase {
     @Autowired
     private CandidateRepository candidateRepository;    
 
-    public CandidateEntity execute(CandidateEntity candidateEntity){       
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-        this.candidateRepository.findByUsernameOrEmail(candidateEntity.getUsername(), candidateEntity.getEmail()).ifPresent(candidate -> {
-            throw new UserFoundException("Username or email already exists");
+    public CandidateEntity execute(CandidateEntity candidateEntity){       
+        this.candidateRepository
+            .findByUsernameOrEmail(candidateEntity.getUsername(), candidateEntity.getEmail()).ifPresent(candidate -> {
+                throw new UserFoundException("Username or email already exists");
         });
+
+        var password = passwordEncoder.encode(candidateEntity.getPassword());
+        candidateEntity.setPassword(password);
 
         return this.candidateRepository.save(candidateEntity);
     }

@@ -19,7 +19,8 @@ public class CreateCompanyUseCase {
     
     public CompanyEntity execute(CompanyEntity companyEntity) {
 
-        this.companyRepository.findByUsernameOrEmail(companyEntity.getUsername(), companyEntity.getEmail())
+        this.companyRepository
+            .findByUsernameOrEmail(companyEntity.getUsername(), companyEntity.getEmail())
             .ifPresent(company -> {
                 throw new UserFoundException("Company username or email already exists");
             });
