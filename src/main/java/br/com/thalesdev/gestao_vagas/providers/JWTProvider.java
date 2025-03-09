@@ -13,7 +13,7 @@ public class JWTProvider {
     @Value("${security.token.secret}")
     private String secretKey;
 
-    public String validadeToken(String token) {        
+    public String validateToken(String token) {        
         token = token.replace("Bearer ", "");
 
         Algorithm algorithm = Algorithm.HMAC256("secretKey");

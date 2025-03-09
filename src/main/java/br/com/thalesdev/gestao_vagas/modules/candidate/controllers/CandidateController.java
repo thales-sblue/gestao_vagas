@@ -6,19 +6,17 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.thalesdev.gestao_vagas.modules.candidate.CandidateEntity;
 import br.com.thalesdev.gestao_vagas.modules.candidate.useCases.CreateCandidateUseCase;
 import br.com.thalesdev.gestao_vagas.modules.candidate.useCases.ProfileCandidateUseCase;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import java.util.UUID;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -43,6 +41,7 @@ public class CandidateController {
     }    
 
     @GetMapping("/")
+    @PreAuthorize("hasRole('CANDIDATE')")
     public ResponseEntity<Object> get(HttpServletRequest request) {
 
         var idCandidate = request.getAttribute("candidate_id");
