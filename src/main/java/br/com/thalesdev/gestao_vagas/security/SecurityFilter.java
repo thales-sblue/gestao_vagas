@@ -1,8 +1,6 @@
 package br.com.thalesdev.gestao_vagas.security;
 
 import java.io.IOException;
-import java.util.Collections;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,52 +27,58 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-        HttpServletRequest request,
-        HttpServletResponse response, 
-        FilterChain filterChain
-    ) throws ServletException, IOException {
-        
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
+
+        // Libera rotas do Swagger
+        if (request.getRequestURI().startsWith("/swagger-ui") ||
+                request.getRequestURI().startsWith("/v3/api-docs")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // Libera rotas públicas
         if (isPublicRoute(request)) {
             filterChain.doFilter(request, response);
             return;
         }
-        
+
         String header = request.getHeader("Authorization");
-        
+
         if (header == null) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
             return;
         }
 
         try {
-                        
+
             if (request.getRequestURI().startsWith("/company")) {
                 var token = this.jwtProvider.validateToken(header);
                 request.setAttribute("company_id", token.getSubject());
 
                 var roles = token.getClaim("roles").asList(Object.class);
 
-                var grants = roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString().toUpperCase())).toList();
+                var grants = roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString().toUpperCase())).toList();
 
-                UsernamePasswordAuthenticationToken auth = 
-                    new UsernamePasswordAuthenticationToken(token.getSubject(), null, grants);
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(token.getSubject(),
+                        null, grants);
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } else if (request.getRequestURI().startsWith("/candidate")) {
                 var token = this.jwtCandidateProvider.validateToken(header);
-                request.setAttribute("candidate_id", token.getSubject());                
+                request.setAttribute("candidate_id", token.getSubject());
 
                 var roles = token.getClaim("roles").asList(Object.class);
 
-                var grants = roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString().toUpperCase())).toList();
+                var grants = roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString().toUpperCase())).toList();
 
-                UsernamePasswordAuthenticationToken auth = 
-                    new UsernamePasswordAuthenticationToken(token.getSubject(), null, grants);
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(token.getSubject(),
+                        null, grants);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
-
-            
 
         } catch (Exception e) {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), "Token inválido");
@@ -86,14 +90,11 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private boolean isPublicRoute(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        String method = request.getMethod();    
-        
-        return (method.equals("POST") && (
-            uri.equals("/candidate/auth") || 
-            uri.equals("/candidate/") || 
-            uri.equals("/company/auth") || 
-            uri.equals("/company/")
-        ));
+        String method = request.getMethod();
+
+        return (method.equals("POST") && (uri.equals("/candidate/auth") ||
+                uri.equals("/candidate/") ||
+                uri.equals("/company/auth") ||
+                uri.equals("/company/")));
     }
 }
-
