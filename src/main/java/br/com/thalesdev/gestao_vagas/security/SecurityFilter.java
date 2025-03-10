@@ -39,8 +39,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // Processa autenticação
+        
         String header = request.getHeader("Authorization");
         
         if (header == null) {
@@ -50,12 +49,16 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         try {
                         
-            if (request.getRequestURI().startsWith("/company") || request.getRequestURI().startsWith("/job")) {
-                var subject = this.jwtProvider.validateToken(header);
-                request.setAttribute("company_id", subject);
+            if (request.getRequestURI().startsWith("/company")) {
+                var token = this.jwtProvider.validateToken(header);
+                request.setAttribute("company_id", token.getSubject());
+
+                var roles = token.getClaim("roles").asList(Object.class);
+
+                var grants = roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString().toUpperCase())).toList();
 
                 UsernamePasswordAuthenticationToken auth = 
-                    new UsernamePasswordAuthenticationToken(subject, null, Collections.emptyList());
+                    new UsernamePasswordAuthenticationToken(token.getSubject(), null, grants);
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } else if (request.getRequestURI().startsWith("/candidate")) {
