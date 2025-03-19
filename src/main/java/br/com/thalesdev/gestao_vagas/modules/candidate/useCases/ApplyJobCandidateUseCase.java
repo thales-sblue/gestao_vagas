@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import br.com.thalesdev.gestao_vagas.exceptions.JobNotFoundException;
 import br.com.thalesdev.gestao_vagas.exceptions.UserNotFoundException;
 import br.com.thalesdev.gestao_vagas.modules.candidate.CandidateRepository;
+import br.com.thalesdev.gestao_vagas.modules.candidate.entity.ApplyJobEntity;
 import br.com.thalesdev.gestao_vagas.modules.candidate.repository.ApplyJobRepository;
 import br.com.thalesdev.gestao_vagas.modules.company.repositories.JobRepository;
 
@@ -23,7 +24,7 @@ public class ApplyJobCandidateUseCase {
     @Autowired
     private ApplyJobRepository applyJobRepository;
 
-    public void execute(UUID candidateId, UUID jobId) {
+    public ApplyJobEntity execute(UUID candidateId, UUID jobId) {
 
         this.candidateRepository.findById(candidateId).orElseThrow(() -> {
             throw new UserNotFoundException();
@@ -33,6 +34,13 @@ public class ApplyJobCandidateUseCase {
             throw new JobNotFoundException();
         });
 
+        var applyJob = ApplyJobEntity.builder()
+                .candidateId(candidateId)
+                .jobId(jobId)
+                .build();
+
+        applyJob = applyJobRepository.save(applyJob);
+        return applyJob;
     }
 
 }
