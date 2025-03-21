@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.thalesdev.gestao_vagas.modules.candidate.CandidateEntity;
 import br.com.thalesdev.gestao_vagas.modules.candidate.dto.ProfileCandidateResponseDTO;
+import br.com.thalesdev.gestao_vagas.modules.candidate.useCases.ApplyJobCandidateUseCase;
 import br.com.thalesdev.gestao_vagas.modules.candidate.useCases.CreateCandidateUseCase;
 import br.com.thalesdev.gestao_vagas.modules.candidate.useCases.ListAllJobsByFilterUseCase;
 import br.com.thalesdev.gestao_vagas.modules.candidate.useCases.ProfileCandidateUseCase;
@@ -44,6 +45,9 @@ public class CandidateController {
 
     @Autowired
     private ListAllJobsByFilterUseCase listAllJobsByFilterUseCase;
+
+    @Autowired
+    private ApplyJobCandidateUseCase applyJobUseCase;
 
     @PostMapping("/")
     @Operation(summary = "Cadastro de candidato", description = "Função responsável por cadastrar um candidato.")
@@ -94,6 +98,27 @@ public class CandidateController {
     @SecurityRequirement(name = "jwt_auth")
     public List<JobEntity> findJobByFilter(@RequestParam String filter) {
         return this.listAllJobsByFilterUseCase.execute(filter);
+    }
+
+    @PostMapping("/job/apply")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    @SecurityRequirement(name = "jwt_auth")
+    @Operation(summary = "Aplicar para uma vaga", description = "Função responsável por aplicar para uma vaga.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(schema = @Schema(implementation = JobEntity.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "User not found")
+    })
+    public ResponseEntity<Object> applyJob(HttpServletRequest request, @RequestBody UUID jobId) {
+        var idCandidate = request.getAttribute("candidate_id");
+
+        try {
+            var result = this.applyJobUseCase.execute(UUID.fromString(idCandidate.toString()), jobId);
+            return ResponseEntity.ok().body(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }
