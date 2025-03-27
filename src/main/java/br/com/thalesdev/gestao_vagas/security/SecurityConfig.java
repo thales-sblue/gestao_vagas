@@ -17,12 +17,14 @@ public class SecurityConfig {
     @Autowired
     private SecurityFilter securityFilter;
 
-    private static final String[] SWAGGER_WHITELIST = {
+    private static final String[] PERMIT_ALL_LIST = {
+            "/actuator/**",
             "/v3/api-docs/**", // Documentação JSON da API
             "/swagger-ui/**", // Interface do Swagger UI
             "/swagger-ui.html", // Página HTML principal (às vezes necessário)
             "/swagger-resources/**", // Recursos do Swagger
             "/webjars/**" // Assets (CSS, JS)
+
     };
 
     @Bean
@@ -31,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/candidate/**").permitAll()
                             .requestMatchers("/company/**").permitAll()
-                            .requestMatchers(SWAGGER_WHITELIST).permitAll();
+                            .requestMatchers(PERMIT_ALL_LIST).permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(securityFilter, BasicAuthenticationFilter.class);

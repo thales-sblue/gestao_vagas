@@ -32,9 +32,9 @@ public class SecurityFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // Libera rotas do Swagger
         if (request.getRequestURI().startsWith("/swagger-ui") ||
-                request.getRequestURI().startsWith("/v3/api-docs")) {
+                request.getRequestURI().startsWith("/v3/api-docs") ||
+                request.getRequestURI().startsWith("/actuator")) {
             filterChain.doFilter(request, response);
             return;
         }
