@@ -34,13 +34,13 @@ public class AuthCompanyUseCase {
     public AuthCompanyResponseDTO execute(AuthCompanyDTO authCompanyDTO) throws AuthenticationException {
 
         var company = this.companyRepository.findByUsername(authCompanyDTO.getUsername()).orElseThrow(
-            () -> {
-                throw new UsernameNotFoundException("Username/password incorrect");
-            });
+                () -> {
+                    throw new UsernameNotFoundException("Username/password incorrect");
+                });
 
         var passwordMatches = this.passwordEncoder.matches(authCompanyDTO.getPassword(), company.getPassword());
-        
-        if(!passwordMatches) {
+
+        if (!passwordMatches) {
             throw new AuthenticationException();
         }
 
@@ -48,18 +48,21 @@ public class AuthCompanyUseCase {
 
         var expiresIn = Instant.now().plus(Duration.ofHours(2));
         var token = JWT.create()
-            .withIssuer("javagas")
-            .withExpiresAt(expiresIn)
-            .withSubject(company.getId().toString())
-            .withClaim("roles", Arrays.asList("COMPANY"))
-            .sign(algorithm);
-        
+                .withIssuer("javagas")
+                .withExpiresAt(expiresIn)
+                .withSubject(company.getId().toString())
+                .withClaim("roles", Arrays.asList("COMPANY"))
+                .sign(algorithm);
+
+        var roles = Arrays.asList("COMPANY");
+
         var authCompanyResponseDTO = AuthCompanyResponseDTO.builder()
-            .access_token(token)
-            .expires_in(expiresIn.toEpochMilli())
-            .build();
+                .access_token(token)
+                .roles(roles)
+                .expires_in(expiresIn.toEpochMilli())
+                .build();
 
         return authCompanyResponseDTO;
     }
-    
+
 }
