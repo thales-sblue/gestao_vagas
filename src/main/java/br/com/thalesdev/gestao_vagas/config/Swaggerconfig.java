@@ -13,7 +13,7 @@ public class Swaggerconfig {
     @Bean
     public OpenAPI openApi() {
         return new OpenAPI()
-                .info(new Info().title("Gestão de Vagas").description("API para gestão de vagas de emprego")
+                .info(new Info().title("VAGASYNC").description("API para gestão de vagas de emprego.")
                         .version("1.0"))
                 .schemaRequirement("jwt_auth", createSecurityScheme());
     }

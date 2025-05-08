@@ -25,6 +25,7 @@ public class ProfileCompanyUseCase {
                 .description(company.getDescription())
                 .email(company.getEmail())
                 .id(company.getId())
+                .website(company.getWebsite())
                 .name(company.getName())
                 .username(company.getUsername())
                 .build();
